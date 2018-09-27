@@ -40,15 +40,24 @@ public class App {
         final Stream<String> concat = concat(list, "A", "B", "C", "D", "E", "F", "G");
         final List<String> collect2 = concat.collect(Collectors.toList());
 
-        ///////////////
-        Predicate<User> myTest = (u) ->
+        ///////////////  findLastIndex   /////////////////////
+        Predicate<User> containsA = (u) ->
         {
             return u.getName().toLowerCase().contains("a");
         };
         List<User> users = Arrays.asList(new User(1,"abc"), new User(2,"BbAcd"), new User(3,"bYr"));
 
-        final boolean abc = myTest.test(new User(1, "abc"));
-        final OptionalInt lastIndex = findLastIndex(users, myTest, 1);
+        final boolean abc = containsA.test(new User(1, "abc"));
+        final OptionalInt lastIndex = findLastIndex(users, containsA, 1);
+
+        ///////////////  dropRightWhile   /////////////////////
+        List<User> users2 = Arrays.asList(new User(3,"bYr"), new User(1,"abc"), new User(2,"BbAcd"));
+        final Stream<User> userStream = dropRightWhile(users2, containsA);
+
+        TriPredicate<User, Integer, List<User>> myTest = (u, i, l) ->
+        {
+            return u.getName().toLowerCase().equals(l.get(i).name);
+        };
     }
 
     /**
@@ -163,4 +172,21 @@ public class App {
                 .findFirst();
     }
 
+    /**
+     * Creates a slice of array excluding elements dropped from the end. Elements are dropped until predicate returns false.
+     * The predicate is invoked with three arguments: (value, index, array).
+     * @param list :The array to inspect.
+     * @param predicate : (Function): The function invoked per iteration.
+     * @return  Returns the slice of list.
+     */
+    private static <T> Stream<T> dropRightWhile(List<T> list, Predicate<T> predicate) {
+        final IntStream range = IntStream.range((list.size()-1)* -1, 1);
+//        range.boxed().collect(Collectors.toList());
+        return range
+                .map(u -> u * -1)
+                .peek(b -> System.out.println("before filter: - " + b))
+                .filter(index -> !predicate.test(list.get(index)))
+                .peek(n -> System.out.println("after filter: - " + n))
+                .mapToObj(i->list.get(i));
+    }
 }
