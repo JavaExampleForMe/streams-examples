@@ -1,4 +1,4 @@
-package main.java.streams.examples;
+package streams.examples;
 
 
 @FunctionalInterface
